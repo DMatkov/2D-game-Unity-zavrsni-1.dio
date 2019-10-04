@@ -2,21 +2,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Character : MonoBehaviour
 {
 
-    public float brzinaLika = 2.2f;
+    public float brzinaLika = 1.9f;
     private bool gledaDesno = true;
-    public int jacinaSkoka = 180;
+    public int jacinaSkoka = 140;
     public float hodajX;
     private bool naPodu = true;
     private bool mozeSkocitPonovo = true;
     private float pocetnaX = -1.538f;
     private float pocetnaY = -0.54f;
+    public static float lijevoOgranicenje = -2.3f;
+    public static float desnoOgranicenje = 36.17f;
+    public float velocity;
+    public bool provjeraMrtav = false;
 
+    private float jacinaOdskoka = 2.9f;
     public bool odskok;
-    public float jacinaOdskoka;
+    
 
     // Start is called before the first frame update
     void Start()
@@ -37,11 +43,11 @@ public class Character : MonoBehaviour
 
     void KretanjeLika()
     {
-        
         hodajX = Input.GetAxis("Horizontal");
+        velocity = gameObject.GetComponent<Rigidbody2D>().velocity.y;
 
         //okretanje
-        if(hodajX < 0 && gledaDesno)
+        if (hodajX < 0 && gledaDesno)
         {
             gledaDesno = false;
             Orjentacija();
@@ -74,7 +80,7 @@ public class Character : MonoBehaviour
         naPodu = true;
         if (pressed) {
             if (gameObject.GetComponent<Rigidbody2D>().velocity.y != 0)
-            {
+            {                
                 naPodu = false;
             }
             if (naPodu)
@@ -97,7 +103,7 @@ public class Character : MonoBehaviour
 
         //ogranicenja kretanja   
         Vector3 pozicija = gameObject.transform.position;
-        pozicija.x = Mathf.Clamp(transform.position.x, -1.57f, 20);
+        pozicija.x = Mathf.Clamp(transform.position.x, lijevoOgranicenje, desnoOgranicenje);
         gameObject.transform.position = pozicija;
 
         
@@ -128,9 +134,17 @@ public class Character : MonoBehaviour
         GetComponent<Rigidbody2D>().AddForce(new Vector2(0, jacinaSkoka-50));
     }
 
+    private void OnCollisionEnter2D(Collision2D obj)
+    {
+        if (obj.gameObject.tag == "Enemy" || obj.gameObject.tag == "Opasno")
+        {
+            provjeraMrtav = true;
+        }
+    }
 
     void Smrt()
     {
-        gameObject.GetComponent<Rigidbody2D>().position = new Vector2(pocetnaX, pocetnaY);
+        provjeraMrtav = true;
+        SceneManager.LoadScene("Prototype_1");
     }
 }
